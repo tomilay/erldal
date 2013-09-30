@@ -1,4 +1,4 @@
 erldal
 ======
 
-Data Access Server For Mnesia
+OTP Data Access Server For Mnesia
