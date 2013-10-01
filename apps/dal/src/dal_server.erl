@@ -44,12 +44,7 @@ init([]) ->
 	{ok, 0}.
 
 %%----------------------------------------------------------------------------------------------
-%% Function: handle_call(_Request, _From, State) -> {reply, Reply, State} | 
-%%													{reply, Reply, State, Timeout} |
-%%													{noreply, State},
-%%													{noreply, State, Timeout},
-%%													{stop, Reason, Reply, State}
-%%													{stop, Reason, State}
+%% Function: handle_call(_Request, _From, State)
 %% Description: Handling call messages
 %%----------------------------------------------------------------------------------------------
 handle_call({select, Qlc}, _From, N) -> 
@@ -66,18 +61,14 @@ handle_call({update, Data}, _From, N) ->
 	{reply, Status, N}.
 
 %%----------------------------------------------------------------------------------------------
-%% Function: handle_cast(Msg, State) -> 	{noreply, State} | 
-%%											{noreply, State, Timeout} |
-%%											{stop, Reason, State}
+%% Function: handle_cast(Msg, State)
 %% Description: Handling cast messages
 %%----------------------------------------------------------------------------------------------
 handle_cast(_Msg, State) -> 
 	{noreply, State}.
 
 %%----------------------------------------------------------------------------------------------
-%% Function: handle_info(Info, State) -> 	{noreply, State} | 
-%%											{noreply, State, Timeout} |
-%%											{stop, Reason, State}
+%% Function: handle_info(Info, State) 
 %% Description: Handling all non call/cast messages
 %%----------------------------------------------------------------------------------------------
 handle_info(_Info, State) -> 
@@ -106,7 +97,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 %%----------------------------------------------------------------------------------------------
 %% Function: select1(Qlc) -> 	{ok, NewState}
-%% Description: Executes a select query with Q, a query list comprehension
+%% Description: Executes a select query with Qlc, a query list comprehension
 %%----------------------------------------------------------------------------------------------
 select1(Qlc) ->
 	F = fun()-> qlc:e(Qlc) end,
@@ -115,7 +106,7 @@ select1(Qlc) ->
 
 %%----------------------------------------------------------------------------------------------
 %% Function: insert1(Q) -> 	{ok, NewState}
-%% Description: Executes a select query with Q, a query list comprehension
+%% Description: Executes an insert query with Data.  Data is an erlang record.
 %%----------------------------------------------------------------------------------------------
 insert1(Data) ->
     F = fun() ->
@@ -125,7 +116,7 @@ insert1(Data) ->
 
 %%----------------------------------------------------------------------------------------------
 %% Function: delete1(Q) -> 	{ok, NewState}
-%% Description: Executes a select query with Q, a query list comprehension
+%% Description: Executes a delete query with Data.  Data is a {Table, Key} erlang term
 %%----------------------------------------------------------------------------------------------
 delete1(Data) ->
     F = fun() ->
