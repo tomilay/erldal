@@ -9,7 +9,7 @@
 -behaviour (gen_server).
 
 %% API
--export ([start_link/0, select/1, insert/1, delete/1, update/1]).
+-export ([start_link/0, select/1, insert/1, delete/1, update/1, insert_list/1, delete_list/1, update_list/1]).
 
 %% gen_server callbacks
 -export ([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -35,6 +35,15 @@ delete(Data) ->
 update({{Tab}, Key, Index, NewValue}) ->
 	gen_server:call(?MODULE, {update, {{Tab}, Key, Index, NewValue}}).
 
+insert_list(Data) ->
+	gen_server:call(?MODULE, {insert_list, Data}).
+
+delete_list(Data) ->
+	gen_server:call(?MODULE, {delete_list, Data}).
+
+update_list(Data) ->
+	gen_server:call(?MODULE, {update_list, Data}).
+
 %%==============================================================================================
 %% gen_server callbacks
 %%==============================================================================================
@@ -58,6 +67,15 @@ handle_call({delete, Data}, _From, N) ->
 	{reply, Status, N};
 handle_call({update, Data}, _From, N) -> 
  	Status = update1(Data),
+	{reply, Status, N};
+handle_call({insert_list, Data}, _From, N) ->
+	Status = insert_list1(Data),
+	{reply, Status, N};
+handle_call({delete_list, Data}, _From, N) ->
+	Status = delete_list1(Data),
+	{reply, Status, N};
+handle_call({update_list, Data}, _From, N) ->
+	Status = update_list1(Data),
 	{reply, Status, N}.
 
 %%----------------------------------------------------------------------------------------------
@@ -96,7 +114,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%----------------------------------------------------------------------------------------------
 
 %%----------------------------------------------------------------------------------------------
-%% Function: select1(Qlc) -> 	{ok, NewState}
+%% Function: select1(Qlc) -> 	{ok, Data}
 %% Description: Executes a select query with Qlc, a query list comprehension
 %%----------------------------------------------------------------------------------------------
 select1(Qlc) ->
@@ -105,7 +123,7 @@ select1(Qlc) ->
 	Val.
 
 %%----------------------------------------------------------------------------------------------
-%% Function: insert1(Q) -> 	{ok, NewState}
+%% Function: insert1(Q) -> 	{atomic, ok}
 %% Description: Executes an insert query with Data.  Data is an erlang record.
 %%----------------------------------------------------------------------------------------------
 insert1(Data) ->
@@ -115,7 +133,7 @@ insert1(Data) ->
     mnesia:transaction(F).
 
 %%----------------------------------------------------------------------------------------------
-%% Function: delete1(Q) -> 	{ok, NewState}
+%% Function: delete1(Data) -> 	{atomic, ok}
 %% Description: Executes a delete query with Data.  Data is a {Table, Key} erlang term
 %%----------------------------------------------------------------------------------------------
 delete1(Data) ->
@@ -125,10 +143,9 @@ delete1(Data) ->
     mnesia:transaction(F).
 
 %%----------------------------------------------------------------------------------------------
-%% Function: update(Criteria) -> 	{ok, NewState}
+%% Function: update(Criteria) -> 	{atomic, ok}
 %% Description: Executes an update query with Criteria, a list of fields to update
 %%----------------------------------------------------------------------------------------------
-
 update1(Data)->
 	{{Tab}, Key, Index, NewValue} = Data,
 
@@ -141,3 +158,33 @@ update1(Data)->
 	F1 = fun() -> mnesia:write(NewRec) end,
 
 	mnesia:transaction(F1).	
+
+%%----------------------------------------------------------------------------------------------
+%% Function: insert_list1(Data) -> 	{atomic, ok}
+%% Description: Executes an update query with Criteria, a list of fields to update
+%%----------------------------------------------------------------------------------------------
+insert_list1(Data) ->
+    F = fun() ->
+		lists:foreach(fun(Item) -> mnesia:write(Item) end, Data)
+	end,
+    mnesia:transaction(F).
+
+%%----------------------------------------------------------------------------------------------
+%% Function: delete_list1(Data) -> 	{atomic, ok}
+%% Description: Executes a delete query with Data.  Data is a {Table, Key} erlang term
+%%----------------------------------------------------------------------------------------------
+delete_list1(Data) ->
+    F = fun() ->
+		lists:foreach(fun(Item) -> mnesia:delete(Item) end, Data)
+	end,
+    mnesia:transaction(F).
+
+%%----------------------------------------------------------------------------------------------
+%% Function: update_list1(Data) -> 	{atomic, ok}
+%% Description: Executes a delete query with Data.  Data is a {Table, Key} erlang term
+%%----------------------------------------------------------------------------------------------
+update_list1(Data) ->
+    F = fun() ->
+		lists:foreach(fun update1/1, Data)
+	end,
+    mnesia:transaction(F).
