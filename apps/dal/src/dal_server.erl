@@ -161,7 +161,7 @@ update1(Data)->
 
 %%----------------------------------------------------------------------------------------------
 %% Function: insert_list1(Data) -> 	{atomic, ok}
-%% Description: Executes an update query with Criteria, a list of fields to update
+%% Description: Executes an insert query with a list of records
 %%----------------------------------------------------------------------------------------------
 insert_list1(Data) ->
     F = fun() ->
@@ -169,10 +169,10 @@ insert_list1(Data) ->
 	end,
     mnesia:transaction(F).
 
-%%----------------------------------------------------------------------------------------------
+%%--------------------------------------------------------------------------------------------------
 %% Function: delete_list1(Data) -> 	{atomic, ok}
-%% Description: Executes a delete query with Data.  Data is a {Table, Key} erlang term
-%%----------------------------------------------------------------------------------------------
+%% Description: Executes a delete query on a list Data.  Data is a list of {Table, Key} erlang term
+%%--------------------------------------------------------------------------------------------------
 delete_list1(Data) ->
     F = fun() ->
 		lists:foreach(fun(Item) -> mnesia:delete(Item) end, Data)
@@ -181,7 +181,7 @@ delete_list1(Data) ->
 
 %%----------------------------------------------------------------------------------------------
 %% Function: update_list1(Data) -> 	{atomic, ok}
-%% Description: Executes a delete query with Data.  Data is a {Table, Key} erlang term
+%% Description: Executes a update query n a list Data.  Data is a list of fields to update 
 %%----------------------------------------------------------------------------------------------
 update_list1(Data) ->
     F = fun() ->
